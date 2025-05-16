@@ -1,0 +1,53 @@
+{
+  "type": "FeatureCollection",
+  "features": [
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.37739, 39.45975]
+      },
+      "properties": {
+        "centro": "Hospital General Universitari",
+        "municipio": "València",
+        "area_salud": "DSV-01",
+        "plazas": 12,
+        "turno": "Mañana",
+        "jornada": "Completa",
+        "tipo_centro": "Hospital"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.4065, 39.4569]
+      },
+      "properties": {
+        "centro": "Hospital La Fe",
+        "municipio": "València",
+        "area_salud": "DSV-01",
+        "plazas": 8,
+        "turno": "Tarde",
+        "jornada": "Parcial",
+        "tipo_centro": "Hospital"
+      }
+    },
+    {
+      "type": "Feature",
+      "geometry": {
+        "type": "Point",
+        "coordinates": [-0.4816, 38.3453]
+      },
+      "properties": {
+        "centro": "Hospital General d'Alacant",
+        "municipio": "Alacant",
+        "area_salud": "DSV-03",
+        "plazas": 5,
+        "turno": "Noche",
+        "jornada": "Completa",
+        "tipo_centro": "Hospital"
+      }
+    }
+  ]
+}
