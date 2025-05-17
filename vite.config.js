@@ -3,7 +3,9 @@ import vue from '@vitejs/plugin-vue'
 import { fileURLToPath, URL } from 'node:url'
 
 export default defineConfig({
-  base: './',  // Importante para que funcione en despliegues estáticos
+  base: process.env.NODE_ENV === 'production'
+    ? '/visor_ope_enfermeria_gva_2022/'
+    : './',
   plugins: [vue()],
   resolve: {
     alias: {
@@ -13,8 +15,17 @@ export default defineConfig({
   },
   build: {
     outDir: 'dist',
+    emptyOutDir: true,
     rollupOptions: {
-      input: './index.html'
+      input: './index.html',
+      output: {
+        assetFileNames: 'assets/[name]-[hash][extname]',
+        chunkFileNames: 'assets/[name]-[hash].js',
+        entryFileNames: 'assets/[name]-[hash].js'
+      }
     }
+  },
+  server: {
+    historyApiFallback: true  // Important for Vue Router
   }
 })
