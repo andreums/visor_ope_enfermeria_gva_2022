@@ -10,22 +10,28 @@ export default defineConfig({
   resolve: {
     alias: {
       '@': fileURLToPath(new URL('./src', import.meta.url)),
-      'primevue': fileURLToPath(new URL('./node_modules/primevue', import.meta.url))
+      '@primeuix': fileURLToPath(new URL('./node_modules/@primeuix', import.meta.url))
     }
+  },
+  css: {
+    postcss: './postcss.config.cjs' // Note the .cjs extension
   },
   build: {
     outDir: 'dist',
     emptyOutDir: true,
+    assetsInlineLimit: 0,
     rollupOptions: {
       input: './index.html',
       output: {
-        assetFileNames: 'assets/[name]-[hash][extname]',
+        assetFileNames: (assetInfo) => {
+          if (assetInfo.name.endsWith('.geojson')) {
+            return 'assets/[name][extname]'
+          }
+          return 'assets/[name]-[hash][extname]'
+        },
         chunkFileNames: 'assets/[name]-[hash].js',
         entryFileNames: 'assets/[name]-[hash].js'
       }
     }
-  },
-  server: {
-    historyApiFallback: true  // Important for Vue Router
   }
 })

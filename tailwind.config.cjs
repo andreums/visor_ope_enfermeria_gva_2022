@@ -1,13 +1,9 @@
-// tailwind.config.js
+// tailwind.config.cjs
+/** @type {import('tailwindcss').Config} */
 module.exports = {
-  darkMode: false,  // Desactiva el modo oscuro
-  content: [
-    "./index.html",
-    "./src/**/*.{vue,js,ts,jsx,tsx}",
-
-  ],
+  content: ['./index.html', './src/**/*.{vue,js,ts,jsx,tsx}'],
   theme: {
     extend: {},
   },
-
-}
+  plugins: [],
+};

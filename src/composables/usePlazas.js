@@ -27,56 +27,56 @@ export default function usePlazas() {
 
   /* ────────────── Carga de Datos ────── */
   async function fetchData() {
-    try {
-      const res = await fetch('/centres.geojson')
-      if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
+  try {
+    const res = await fetch(`${import.meta.env.BASE_URL}centres.geojson`)
+    if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`)
 
-      const geo = await res.json()
-      if (!geo.features || !Array.isArray(geo.features)) {
-        throw new Error('Invalid GeoJSON format')
-      }
-
-      features.value = geo.features.map(f => {
-        const p = f.properties
-        return {
-          geometry: f.geometry,
-          properties: {
-            // Propiedades originales nombradas explícitamente
-            center_id: p.center_id ?? null,
-            center_name: p.center_name ?? '—',
-            center_type: p.center_type ?? 'Sin clasificar',
-            department_code: p.department_code ?? '—',
-            department_name: p.department_name ?? '—',
-            latitude: p.latitude ?? null,
-            longitude: p.longitude ?? null,
-            municipality: p.municipality ?? 'Desconocido',
-            municipality_code: p.municipality_code ?? null,
-            postal_code: p.postal_code ?? '—',
-            province: p.province ?? '—',
-            street_name: p.street_name ?? '—',
-            street_number: p.street_number ?? '—',
-            vacancies_assigned: p.vacancies_assigned ?? 0,
-            vacancies_difference: p.vacancies_difference ?? 0,
-            vacancies_offered: p.vacancies_offered ?? 0,
-
-            // Alias/fallbacks para filtros y popups
-            centro: p.center_name ?? '—',
-            municipio: p.municipality ?? 'Desconocido',
-            area_salud: p.department_name ?? 'Desconocido',
-            tipo_centro: p.center_type ?? 'Sin clasificar',
-            plazas: p.vacancies_difference ?? 0
-          }
-        }
-      })
-
-      console.info(`✅ Datos cargados: ${features.value.length} elementos`)
-    } catch (err) {
-      error.value = err.message
-      console.error(`❌ Error cargando datos: ${err.message}`)
-    } finally {
-      loading.value = false
+    const geo = await res.json()
+    if (!geo.features || !Array.isArray(geo.features)) {
+      throw new Error('Invalid GeoJSON format')
     }
+
+    features.value = geo.features.map(f => {
+      const p = f.properties
+      return {
+        geometry: f.geometry,
+        properties: {
+          // Propiedades originales nombradas explícitamente
+          center_id: p.center_id ?? null,
+          center_name: p.center_name ?? '—',
+          center_type: p.center_type ?? 'Sin clasificar',
+          department_code: p.department_code ?? '—',
+          department_name: p.department_name ?? '—',
+          latitude: p.latitude ?? null,
+          longitude: p.longitude ?? null,
+          municipality: p.municipality ?? 'Desconocido',
+          municipality_code: p.municipality_code ?? null,
+          postal_code: p.postal_code ?? '—',
+          province: p.province ?? '—',
+          street_name: p.street_name ?? '—',
+          street_number: p.street_number ?? '—',
+          vacancies_assigned: p.vacancies_assigned ?? 0,
+          vacancies_difference: p.vacancies_difference ?? 0,
+          vacancies_offered: p.vacancies_offered ?? 0,
+
+          // Alias/fallbacks para filtros y popups
+          centro: p.center_name ?? '—',
+          municipio: p.municipality ?? 'Desconocido',
+          area_salud: p.department_name ?? 'Desconocido',
+          tipo_centro: p.center_type ?? 'Sin clasificar',
+          plazas: p.vacancies_difference ?? 0
+        }
+      }
+    })
+
+    console.info(`✅ Datos cargados: ${features.value.length} elementos`)
+  } catch (err) {
+    error.value = err.message
+    console.error(`❌ Error cargando datos: ${err.message}`)
+  } finally {
+    loading.value = false
   }
+}
 
   /* ────────────── Computed Properties ───── */
   const healthAreas = computed(() => {

@@ -1,14 +1,7 @@
-/* src/styles.css */
-
-/* Importar Tailwind */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* Custom styles */
-#map {
-  z-index: 0;
-}
 
 /* Estilos para Leaflet */
 .leaflet-tooltip {
@@ -16,11 +9,11 @@
 }
 
 .leaflet-tooltip-top:before {
-  @apply border-t-gray-300;
+  @apply border-t border-gray-300;
 }
 
 .leaflet-tooltip-bottom:before {
-  @apply border-b-gray-300;
+  @apply border-b border-gray-300;
 }
 
 /* Ajustes para PrimeVue */
@@ -41,9 +34,9 @@
 }
 
 .p-tooltip-arrow::before {
-  @apply border-t-gray-300;
+  @apply border-t border-gray-300;
 }
 
 .p-tooltip-arrow::after {
-  @apply border-b-gray-300;
+  @apply border-b border-gray-300;
 }
