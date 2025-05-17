@@ -280,21 +280,24 @@ function updateMarkers(data) {
   data.forEach(feature => {
     const p = feature.properties
     const [lng, lat] = feature.geometry.coordinates
+    console.log(p);
 
     const popupContent = `
       <div style="min-width:260px">
-        <div class="font-bold text-base mb-1">${p.centro ?? p.center_name ?? '—'}</div>
-        <div class="text-xs text-gray-500 mb-2">${p.center_id ? 'Código: ' + p.center_id : ''}</div>
+        <div class="font-bold text-base mb-1">${p.center_id ?p.center_id : ''} - ${p.centro ?? p.center_name ?? '—'}</div>
+      
+
+        <div class="flex flex-wrap gap-2 mb-2">
+          <span class="inline-block bg-blue-100 text-blue-800 text-xs rounded px-2 py-1">${p.tipo_centro ?? p.center_type ?? '—'}</span>
+          <span class="inline-block bg-green-100 text-green-800 text-xs rounded px-2 py-1">${p.area_salud ?? p.department_name ?? '—'}</span>
+        </div>
+        
         <div class="mb-2 text-xs text-gray-700">
           ${p.street_name ?? '—'}
           ${p.street_number ? ', ' + p.street_number : ''}
           ${p.postal_code ? ' · ' + p.postal_code : ''}
           ${(p.municipio ?? p.municipality) ? ' · ' + (p.municipio ?? p.municipality) : ''}
           ${p.province ? ' · ' + p.province : ''}
-        </div>
-        <div class="flex flex-wrap gap-2 mb-2">
-          <span class="inline-block bg-blue-100 text-blue-800 text-xs rounded px-2 py-1">${p.tipo_centro ?? p.center_type ?? '—'}</span>
-          <span class="inline-block bg-green-100 text-green-800 text-xs rounded px-2 py-1">${p.area_salud ?? p.department_name ?? '—'}</span>
         </div>
         <div class="flex flex-wrap gap-2 mb-2">
           <span class="inline-block bg-gray-100 text-gray-800 text-xs rounded px-2 py-1">Ofertadas: <b>${p.vacancies_offered ?? '—'}</b></span>
