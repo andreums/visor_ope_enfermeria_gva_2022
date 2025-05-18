@@ -30,7 +30,7 @@
       </div>
     </Dialog>
 
-    <!-- Diálogo de geolocalización -->
+    <!-- Diálogo de geolocalización con botones estilizados con Tailwind y PrimeVue -->
     <Dialog
       v-model:visible="showGeoDialog"
       modal
@@ -39,21 +39,30 @@
       :style="{ width: '90vw', maxWidth: '400px' }"
     >
       <div class="mb-4">
-        <p>{{ t('route.distanceNeedGeo') }}</p>
+        <p>{{ t('route.distanceNeedGeo') }}</p> 
       </div>
       <div class="flex flex-col gap-2">
         <button
-          class="p-button p-component p-button-sm p-button-primary"
+          class="inline-flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-600 text-sm font-medium px-4 py-2 rounded hover:bg-blue-100 transition"
           @click="requestGeolocation"
-        >{{ t('route.useGeolocation') }}</button>
+        >
+          <i class="fa-solid fa-location-crosshairs"></i>
+          {{ t('route.useGeolocation') }}
+        </button>
         <button
-          class="p-button p-component p-button-sm p-button-secondary"
+          class="inline-flex items-center gap-2 bg-white text-blue-600 border border-blue-600 text-sm font-medium px-4 py-2 rounded hover:bg-blue-50 transition"
           @click="startSelectingOnMap"
-        >{{ t('route.selectOnMap') }}</button>
+        >
+          <i class="fa-solid fa-location-dot"></i>
+          {{ t('route.selectOnMap') }}
+        </button>
         <button
-          class="p-button p-component p-button-sm p-button-danger"
+          class="inline-flex items-center gap-2 bg-red-50 text-red-700 border border-red-400 text-sm font-medium px-4 py-2 rounded hover:bg-red-100 transition"
           @click="showGeoDialog = false"
-        >{{ t('route.cancel') }}</button>
+        >
+          <i class="fa-solid fa-xmark"></i>
+          {{ t('route.cancel') }}
+        </button>
       </div>
     </Dialog>
 
