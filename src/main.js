@@ -23,9 +23,15 @@ app.use(PrimeVue, {
 app.mount('#app');
 
 if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('/sw.js').then((registration) => {
+  navigator.serviceWorker.register(`${import.meta.env.BASE_URL}sw.js`).then((registration) => {
     console.log('Service Worker registrado:', registration)
   }).catch((error) => {
     console.log('Error al registrar el Service Worker:', error)
   })
+}
+
+export default {
+  base: process.env.NODE_ENV === 'production'
+    ? '/visor_ope_enfermeria_gva_2022/'
+    : './',
 }

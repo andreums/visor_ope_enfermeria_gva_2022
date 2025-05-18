@@ -205,8 +205,17 @@ const installPWA = async () => {
             <i class="fa-solid fa-circle-info"></i>
             {{ t('buttons.acercaDe') }}
           </button>
+          <button
+            v-if="deferredPrompt"
+            @click="installPWA"
+            class="flex items-center gap-2 bg-green-600 text-white px-5 py-2 rounded-full shadow-lg hover:bg-green-700 transition"
+            style="min-width: 130px;"
+          >
+            <i class="fa-solid fa-download"></i>
+            Instalar
+          </button>
         </div>
-
+ 
         <!-- Stats Panel -->
         <FloatingStatsPanel
           :show="showStatsPanel"

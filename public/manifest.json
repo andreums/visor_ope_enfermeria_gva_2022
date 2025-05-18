@@ -1,7 +1,7 @@
 {
-  "name": "GVA OPE 2022",
-  "short_name": "GVA OPE",
-  "description": "Consulta plazas sanitarias y rutas en la Comunidad Valenciana.",
+  "name": "Plazas Enfermería GVA OPE 2022",
+  "short_name": "Plazas Enfermería",
+  "description": "Consulta plazas sanitarias OPE Enfería GVA 2022 en la Comunitat Valenciana.",
   "theme_color": "#2563eb",
   "background_color": "#ffffff",
   "display": "standalone",
