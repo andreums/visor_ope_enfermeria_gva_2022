@@ -446,9 +446,15 @@ function updateMarkers(data) {
       if (!userMarker.value) {
         distanceHtml = `
           <div class="mt-2 text-xs text-blue-900">
-            <a href="#" onclick="window.__calcDistanceTo__(${lat},${lng},'${p.center_id}')" style="color:#2563eb;text-decoration:underline;cursor:pointer;">
-              ${t('route.distancePrompt')}
-            </a>
+            <div class="font-semibold mb-1">${t('route.distancePromptTitle') || 'Distancia al centro sanitario'}</div>
+            <button
+              onclick="window.__calcDistanceTo__(${lat},${lng},'${p.center_id}')"
+              class="inline-flex items-center gap-2 bg-blue-50 text-blue-700 border border-blue-200 text-xs font-medium px-3 py-1 rounded hover:bg-blue-100 transition"
+              style="cursor:pointer;"
+            >
+              <i class="fa-solid fa-location-dot"></i>
+              <span>${t('route.distancePrompt')}</span>
+            </button>
           </div>
         `
       } else {
@@ -469,21 +475,24 @@ function updateMarkers(data) {
       }
 
       const popupContent = `
-        <div style="padding:16px 8px 8px 8px;max-width:320px;">
-          <div class="font-bold text-base mb-1">${p.center_id ? p.center_id : ''} - ${p.centro ?? p.center_name ?? '—'}</div>
+        <div class="p-2 max-w-xs">
+          <div class="font-bold text-base mb-1">${p.center_id ? p.center_id + ' - ' : ''}${p.centro ?? p.center_name ?? '—'}</div>
           <div class="flex flex-wrap gap-2 mb-2">
             <span class="inline-block bg-blue-100 text-blue-800 text-xs rounded px-2 py-1">${p.tipo_centro ?? p.center_type ?? '—'}</span>
             <span class="inline-block bg-green-100 text-green-800 text-xs rounded px-2 py-1">${p.area_salud ?? p.department_name ?? '—'}</span>
           </div>
-          <div class="mb-2 text-xs text-gray-700">
-            ${p.street_name ?? '—'}
-            ${p.street_number ? ', ' + p.street_number : ''}
-            ${p.postal_code ? ' · ' + p.postal_code : ''}
-            ${(p.municipio ?? p.municipality) ? ' · ' + (p.municipio ?? p.municipality) : ''}
-            ${p.province ? ' · ' + p.province : ''}
-          </div>
           <div class="mb-2 text-xs">
-            <div class="font-semibold mb-1" style="color:#2563eb;">${t('route.plazas') || 'Plazas'}</div>
+            <div class="font-semibold mb-1 text-blue-700">${t('table.direccion') || 'Dirección completa'}</div>
+            <div class="text-gray-700">
+              ${p.street_name ?? '—'}
+              ${p.street_number ? ', ' + p.street_number : ''}
+              ${p.postal_code ? ' · ' + p.postal_code : ''}
+              ${(p.municipio ?? p.municipality) ? ' · ' + (p.municipio ?? p.municipality) : ''}
+              ${p.province ? ' · ' + p.province : ''}
+            </div>
+          </div>
+          <div class="mb-2 text-xs" style="width:65%;">
+            <div class="font-semibold mb-1 text-blue-700">${t('route.plazas') || 'Plazas'}</div>
             <div class="flex flex-col gap-1">
               <span class="inline-block bg-blue-50 text-blue-900 rounded px-2 py-1">
                 <b>${t('route.offered') || 'Ofertadas'}:</b> ${p.vacancies_offered ?? '—'}
@@ -494,7 +503,7 @@ function updateMarkers(data) {
               <span class="inline-block bg-gray-100 text-gray-900 rounded px-2 py-1">
                 <b>${t('route.free') || 'Libres'}:</b> ${
                   typeof p.vacancies_offered === 'number' && typeof p.vacancies_assigned === 'number'
-                    ? p.vacancies_offered - p.vacancies_assigned
+                    ? p.vacancies_offered - p.vacancies_assigned 
                     : '—'
                 }
               </span>
@@ -513,8 +522,8 @@ function updateMarkers(data) {
             <a
               href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}"
               target="_blank"
-              class="flex-1 flex items-center justify-center gap-2 bg-green-500 text-white text-xs font-medium py-2 rounded-md hover:bg-green-600 transition"
-              style="border:none; cursor:pointer; text-decoration:none;"
+              class="flex-1 flex items-center justify-center gap-2 bg-white text-blue-600 border border-blue-600 text-xs font-medium py-2 rounded-md hover:bg-blue-50 transition"
+              style="cursor:pointer; text-decoration:none;"
             >
               <i class="fa-brands fa-google"></i>
               <span>Google Maps</span>
