@@ -383,14 +383,10 @@ onMounted(() => {
   };
 
   const overlayMaps = {
+    "🏥 Departamentos de Salud (GVA)": layerDepartamentosSalud,
     "📮 Códigos postales": layerCodigosPostales,
     "📍 Límites municipales": layerLimitesMunicipales,
-    "🏠 Direcciones (IGN)": layerIGNDirecciones,
-    "🏥 Departamentos de Salud (GVA)": layerDepartamentosSalud,
-    "🏥 Hospitales": hospitalesGroup,
-    "🩺 Centros de Salud": centrosSaludGroup,
-    "🧑‍⚕️ Consultorios": consultoriosGroup,
-    "📌 Otros": otrosGroup
+    "🏠 Direcciones (IGN)": layerIGNDirecciones
   };
 
   L.control.layers(baseMaps, overlayMaps, {
