@@ -29,6 +29,7 @@ const showDrawer = ref(false)
 const visibleCenters = ref([])
 const showStatsPanel = ref(false)
 const showRawData = ref(false)
+const showHelp = ref(false)
 
 const checkScreenSize = () => { isMobile.value = window.innerWidth < 768 }
 const setLanguage = () => {
@@ -104,7 +105,10 @@ watch([selectedAreas, selectedTipos, selectedMunicipios], (newValues) => {
             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
           </svg>
         </button>
-        <h1 class="text-xl font-semibold">{{ t('app.title') }}</h1>
+        <h1 class="text-xl font-semibold flex items-center gap-2">
+          <i class="fa-solid fa-hospital text-blue-600"></i>
+          {{ t('app.title') }}
+        </h1>
       </div>
       <button
         @click="locale = locale === 'es' ? 'ca' : 'es'"
@@ -160,7 +164,7 @@ watch([selectedAreas, selectedTipos, selectedMunicipios], (newValues) => {
             style="min-width: 130px;"
           >
             <i class="fa-solid fa-chart-column"></i>
-            Plazas
+            {{ t('buttons.plazas') }}
           </button>
           <button
             v-if="!showRawData"
@@ -169,7 +173,15 @@ watch([selectedAreas, selectedTipos, selectedMunicipios], (newValues) => {
             style="min-width: 110px;"
           >
             <i class="fa-solid fa-table"></i>
-            Datos
+            {{ t('buttons.datos') }}
+          </button>
+          <button
+            @click="showHelp = true"
+            class="flex items-center gap-2 bg-gray-600 text-white px-5 py-2 rounded-full shadow-lg hover:bg-gray-700 transition"
+            style="min-width: 110px;"
+          >
+            <i class="fa-solid fa-circle-info"></i>
+            {{ t('buttons.acercaDe') }}
           </button>
         </div>
 
@@ -196,6 +208,40 @@ watch([selectedAreas, selectedTipos, selectedMunicipios], (newValues) => {
               :data="visibleCenters"
               @close-row-panel="cerrarPanelDatos"
             />
+          </div>
+        </transition>
+
+        <!-- Help Modal -->
+        <transition name="fade">
+          <div
+            v-if="showHelp"
+            class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white shadow-lg rounded-lg p-6"
+            style="width: 90vw; max-width: 400px;"
+          > 
+            <img
+              src="/logo.png"
+              alt="Logo de la marca"
+              class="w-24 h-24 mx-auto mb-4"
+            />
+            <h2 class="text-lg font-semibold mb-4">{{ t('about.title') }}</h2>
+            <p class="text-sm text-gray-700 mb-4">
+              {{ t('about.description') }}
+            </p>
+            <p class="text-sm text-gray-700 mb-4"> 
+              {{ t('about.contact') }}
+            </p>
+            <p class="text-sm text-gray-700 mb-4 font-semibold">
+              {{ t('about.copyright') }}<br>
+              <a :href="t('about.website')" target="_blank" class="text-blue-600 hover:underline">
+                {{ t('about.website') }}
+              </a>
+            </p>
+            <button
+              @click="showHelp = false"
+              class="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+            >
+              {{ t('about.close') }}
+            </button>
           </div>
         </transition>
       </div>
@@ -269,5 +315,20 @@ watch([selectedAreas, selectedTipos, selectedMunicipios], (newValues) => {
 .fade-enter-from,
 .fade-leave-to {
   opacity: 0;
+}
+
+.popup-help {
+  animation: fadeIn 0.3s ease;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 </style>

@@ -62,25 +62,34 @@ const originalAreas = ref(JSON.parse(JSON.stringify(props.areas)))
 const originalTipos = ref(JSON.parse(JSON.stringify(props.tipos)))
 const originalMunicipios = ref(JSON.parse(JSON.stringify(props.municipios)))
 
-const areasOptions = computed(() => 
-  originalAreas.value.map(item => ({
-    ...item,
-    uniqueValue: `area_${item.value}`
-  }))
+const areasOptions = computed(() =>
+  originalAreas.value
+    .slice()
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .map(item => ({
+      ...item,
+      uniqueValue: `area_${item.value}`
+    }))
 )
 
-const tiposOptions = computed(() => 
-  originalTipos.value.map(item => ({
-    ...item,
-    uniqueValue: `tipo_${item.value}`
-  }))
+const tiposOptions = computed(() =>
+  originalTipos.value
+    .slice()
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .map(item => ({
+      ...item,
+      uniqueValue: `tipo_${item.value}`
+    }))
 )
 
-const municipiosOptions = computed(() => 
-  originalMunicipios.value.map(item => ({
-    ...item,
-    uniqueValue: `mun_${item.value}`
-  }))
+const municipiosOptions = computed(() =>
+  originalMunicipios.value
+    .slice()
+    .sort((a, b) => a.label.localeCompare(b.label))
+    .map(item => ({
+      ...item,
+      uniqueValue: `mun_${item.value}`
+    }))
 )
 
 // Convert model values to display format

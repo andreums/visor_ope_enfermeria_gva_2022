@@ -2,8 +2,8 @@
   <transition name="fade">
     <div
       v-if="show"
-      class="fixed bottom-0 left-1/2 -translate-x-1/2 z-50 bg-white/65 backdrop-blur-md border-t border-gray-200 shadow-2xl rounded-t-xl p-6 flex flex-col"
-      style="width: 90vw; max-width: 1400px; min-height: 100px; max-height: 500px;"
+      class="fixed bottom-0 left-1/2 -translate-x-1/2 z-50 bg-white/65 backdrop-blur-md border-t border-gray-200 shadow-2xl rounded-t-xl p-6 flex flex-col overflow-y-auto"
+      style="width: 90vw; max-width: 1400px; min-height: 100px; max-height: 80vh;"
     >
       <div class="absolute top-3 right-4 flex gap-2 items-center">
         <button
@@ -12,7 +12,7 @@
           class="text-xs bg-red-100 hover:bg-red-200 text-red-700 border border-red-300 rounded px-3 py-1 font-medium shadow focus:outline-none"
           aria-label="Eliminar filtros"
         >
-          <i class="fa-solid fa-filter-circle-xmark mr-1 text-red-400"></i> Eliminar filtros
+          <i class="fa-solid fa-filter-circle-xmark mr-1 text-red-400"></i>
         </button>
         <button
   @click="$emit('close')"

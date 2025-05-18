@@ -38,8 +38,8 @@ export default {
         postal_code: 'Código postal',
         municipio: 'Municipio',
         province: 'Provincia',
-        vacancies_offered: 'Plazas ofertadas',
-        vacancies_assigned: 'Plazas asignadas',
+        vacancies_offered: 'Ofertadas',
+        vacancies_assigned: 'Asignadas',
         vacancies_difference: 'Diferencia de plazas',
         close_panel: 'Cerrar panel',
         plazas: 'Plazas',
@@ -49,6 +49,49 @@ export default {
         show_stats: 'Plazas',
         show_data: 'Datos',
         close: 'Cerrar'
+      },
+      route: {
+        start: 'Inicio',
+        end: 'Final',
+        totalDistance: 'Distancia total',
+        estimatedDuration: 'Duración estimada',
+        step: 'Paso de la ruta',
+        here: '¡Estás aquí!',
+        selectStart: 'Selecciona el punto de inicio de la ruta',
+        useGeolocation: 'Usar mi geolocalización',
+        selectOnMap: 'Seleccionar un punto en el mapa',
+        cancel: 'Cancelar',
+        instructions: 'Indicaciones',
+        noInstructions: 'No hay indicaciones disponibles.',
+        closeDirections: 'Cerrar indicaciones',
+        selectStartHeader: 'Selecciona el punto de inicio',
+        selectStartQuestion: '¿Cómo quieres seleccionar el punto de inicio de la ruta?',
+        clickOnMap: 'Haz clic en el mapa para seleccionar el punto de inicio.',
+        routeStart: 'Inicio de la ruta',
+        routeEnd: 'Fin de la ruta', 
+        routeStep: 'Paso de la ruta',
+        routeToHere: 'Ruta hasta aquí',
+        offered: 'Ofertadas',
+        assigned: 'Asignadas',
+        free: 'Libres',
+        plazas: 'Plazas',
+        distancePrompt: 'Calcula la distancia a este centro sanitario',
+        distanceNeedGeo: 'Debes geolocalizar tu posición para calcular la distancia',
+        distanceFromYou: 'Distancia desde tu ubicación',
+        timeFromYou: 'Tiempo estimado desde tu ubicación'
+      },
+      about: {
+        title: 'Acerca de',
+        description: 'Esta aplicación muestra información sobre plazas sanitarias disponibles en la Comunidad Valenciana. Puedes filtrar por áreas de salud, tipos de centro y municipios, y calcular rutas a los centros seleccionados.',
+        contact: 'Para más información, contacta con el equipo de desarrollo:',
+        copyright: '(C) 2025 - Andrés Martínez Soto',
+        website: 'https://www.andresmartinezsoto.eu',
+        close: 'Cerrar'
+      },
+      buttons: {
+        plazas: 'Plazas',
+        datos: 'Datos',
+        acercaDe: 'Acerca de'
       }
     },
     ca: {
@@ -97,6 +140,49 @@ export default {
         show_stats: 'Places',
         show_data: 'Dades',
         close: 'Tancar'
+      },
+      route: {
+        start: 'Inici',
+        end: 'Final',
+        totalDistance: 'Distància total',
+        estimatedDuration: 'Durada estimada',
+        step: 'Pas de la ruta',
+        here: 'Ets aquí!',
+        selectStart: 'Selecciona el punt d\'inici de la ruta',
+        useGeolocation: 'Usar la meva geolocalització',
+        selectOnMap: 'Seleccionar punt d\'inici al mapa',
+        cancel: 'Cancel·lar',
+        instructions: 'Indicacions',
+        noInstructions: 'No hi ha indicacions disponibles.',
+        closeDirections: 'Tancar indicacions',
+        selectStartHeader: 'Selecciona el punt d\'inici',
+        selectStartQuestion: 'Com vols seleccionar el punt d\'inici de la ruta?',
+        clickOnMap: 'Fes clic al mapa per seleccionar el punt d\'inici.',
+        routeStart: 'Inici de la ruta',
+        routeEnd: 'Final de la ruta',
+        routeStep: 'Pas de la ruta',
+        offered: 'Ofertades',
+        assigned: 'Assignades',
+        free: 'Lliures',
+        routeToHere: 'Ruta fins aquí',
+        plazas: 'Places',
+        distancePrompt: 'Calcula la distància a aquest centre sanitari',
+        distanceNeedGeo: 'Has de geolocalitzar la teua posició per calcular la distància',
+        distanceFromYou: 'Distància des de la teua ubicació',
+        timeFromYou: 'Temps estimat des de la teua ubicació'
+      }, 
+      about: {
+        title: 'Sobre nosaltres',
+        description: 'Aquesta aplicació mostra informació sobre places sanitàries disponibles a la Comunitat Valenciana. Pots filtrar per àrees de salut, tipus de centre i municipis, i calcular rutes als centres seleccionats.',
+        contact: 'Per a més informació, contacta amb l\'equip de desenvolupament:',
+        copyright: '(C) 2025 - Andrés Martínez Soto',
+        website: 'https://www.andresmartinezsoto.eu',
+        close: 'Tancar'
+      },
+      buttons: {
+        plazas: 'Places',
+        datos: 'Dades',
+        acercaDe: 'Sobre nosaltres'
       }
     }
   }

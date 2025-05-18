@@ -46,3 +46,7 @@
   @apply border-b border-gray-300;
 }
 
+.leaflet-control-custom:hover {
+  background: #e0e7ff !important;
+}
+

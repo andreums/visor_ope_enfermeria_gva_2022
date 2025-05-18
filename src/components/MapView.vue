@@ -1,20 +1,141 @@
 <template>
-  <!-- the parent (App.vue) gives full height & width -->
-  <div id="map" class="w-full h-full rounded-lg shadow-md"></div>
+  <div class="flex h-full w-full">
+    <!-- the parent (App.vue) gives full height & width -->
+    <div id="map" class="flex-1 h-full rounded-lg shadow-md"></div>
+    <div
+      id="routing-panel"
+      v-show="showRoutingPanel"
+      class="fixed right-0 top-0 z-[2001] w-full md:w-[340px] max-w-full h-full bg-white border-l border-gray-200 shadow-lg overflow-y-auto p-4"
+      style="min-width:240px;"
+    >
+      <!-- Botón para cerrar indicaciones -->
+      <button
+        class="absolute top-2 right-2 text-gray-500 hover:text-gray-900"
+        @click="clearRoute"
+        :aria-label="t('route.closeDirections')"
+      >
+        <i class="fa-solid fa-xmark text-2xl"></i>
+      </button>
+
+      <!-- Nueva sección para mostrar instrucciones de la ruta -->
+      <div v-if="routeSummary" class="mb-4 space-y-2">
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-location-dot text-green-600"></i>
+          <span class="font-semibold">{{ t('route.start') }}:</span>
+          <span class="text-gray-700">{{ routeStartAddress || routeStartName || '—' }}</span>
+        </div>
+        <div class="flex items-center gap-2">
+          <i class="fa-solid fa-location-dot text-red-600"></i>
+          <span class="font-semibold">{{ t('route.end') }}:</span>
+          <span class="text-gray-700">{{ routeEndAddress || routeEndName || '—' }}</span>
+        </div> 
+        <div class="font-semibold text-base">
+          {{ t('route.totalDistance') }}: <span class="text-blue-700">{{ (routeSummary.totalDistance / 1000).toFixed(2) }} km</span>
+        </div>
+        <div class="font-semibold text-base">
+          {{ t('route.estimatedDuration') }}: <span class="text-blue-700">{{ formatDuration(routeSummary.totalTime) }}</span>
+        </div>
+      </div>
+      <div v-if="routeInstructions.length">
+        <h3 class="font-bold mb-2 text-lg">{{ t('route.instructions') }}</h3>
+        <ol class="list-decimal pl-5 space-y-2">
+          <li
+            v-for="(step, i) in routeInstructions"
+            :key="i"
+            class="cursor-pointer hover:bg-blue-50 rounded px-1 transition"
+            @click="goToStep(i)"
+          >
+            {{ step.text || step.instruction || step.streetName || step.name }}
+            <span v-if="step.distance"> ({{ (step.distance/1000).toFixed(2) }} km)</span>
+          </li>
+        </ol>
+      </div>
+      <div v-else class="text-gray-500">{{ t('route.noInstructions') }}</div>
+    </div>
+
+    <!-- Diálogo: solo muestra opciones, NO bloquea el mapa al seleccionar en el mapa -->
+    <Dialog
+      v-model:visible="showSelectStartModal"
+      modal
+      :header="t('route.selectStartHeader')"
+      :closable="false"
+      :style="{ width: '90vw', maxWidth: '400px' }"
+    >
+      <div class="mb-4">
+        <p>{{ t('route.selectStartQuestion') }}</p>
+      </div>
+      <div class="flex flex-col gap-2">
+        <button
+          class="p-button p-component p-button-sm p-button-primary"
+          @click="useGeolocation"
+        >{{ t('route.useGeolocation') }}</button>
+        <button
+          class="p-button p-component p-button-sm p-button-secondary"
+          @click="startSelectingOnMap"
+        >{{ t('route.selectOnMap') }}</button>
+        <button
+          class="p-button p-component p-button-sm p-button-danger"
+          @click="cancelRoute"
+        >{{ t('route.cancel') }}</button>
+      </div>
+    </Dialog>
+
+    <!-- Diálogo de geolocalización -->
+    <Dialog
+      v-model:visible="showGeoDialog"
+      modal
+      :header="t('route.selectStartHeader')"
+      :closable="false"
+      :style="{ width: '90vw', maxWidth: '400px' }"
+    >
+      <div class="mb-4">
+        <p>{{ t('route.distanceNeedGeo') }}</p>
+      </div>
+      <div class="flex flex-col gap-2">
+        <button
+          class="p-button p-component p-button-sm p-button-primary"
+          @click="requestGeolocation"
+        >{{ t('route.useGeolocation') }}</button>
+        <button
+          class="p-button p-component p-button-sm p-button-secondary"
+          @click="startSelectingOnMap"
+        >{{ t('route.selectOnMap') }}</button>
+        <button
+          class="p-button p-component p-button-sm p-button-danger"
+          @click="showGeoDialog = false"
+        >{{ t('route.cancel') }}</button>
+      </div>
+    </Dialog>
+
+    <!-- Mensaje flotante mientras selecciona en el mapa -->
+    <div
+      v-if="selectingOnMap"
+      class="fixed left-1/2 top-8 z-[2000] -translate-x-1/2 bg-blue-600 text-white px-4 py-2 rounded shadow-lg animate-pulse"
+    >
+      {{ t('route.clickOnMap') }}
+    </div>
+  </div>
 </template>
 
 <script setup>
 import { onMounted, watch, ref } from 'vue'
 import L from 'leaflet'
 import 'leaflet/dist/leaflet.css'
-
+import Dialog from 'primevue/dialog'
+import { useI18n } from 'vue-i18n'
+const { locale } = useI18n()
+ 
 /* ─── Plugins & CSS ───────────────────────────────────────────────────── */
 import 'leaflet-fullscreen'
 import 'leaflet-fullscreen/dist/leaflet.fullscreen.css'
 import 'leaflet.markercluster/dist/MarkerCluster.css'
 import 'leaflet.markercluster/dist/MarkerCluster.Default.css'
 import 'leaflet.markercluster'
+import 'leaflet-routing-machine'
+import 'leaflet-routing-machine/dist/leaflet-routing-machine.css'
 /* ─────────────────────────────────────────────────────────────────────── */
+
+const { t } = useI18n()
 
 // Grupos de overlays
 const hospitalesGroup = L.layerGroup();
@@ -30,6 +151,20 @@ const emit = defineEmits(['update:visibleCenters'])
 
 /* State */
 let map, clusterLayer
+let routingControl = null
+
+const showSelectStartModal = ref(false)
+const pendingRoute = ref(null)
+const selectingOnMap = ref(false)
+const showRoutingPanel = ref(false)
+const routeInstructions = ref([])
+const routeSummary = ref(null)
+const lastRoute = ref(null)
+const routeStartName = ref('')
+const routeEndName = ref('')
+const routeStartAddress = ref('')
+const routeEndAddress = ref('')
+const showGeoDialog = ref(false)
 
 /* Custom default icon */
 const DefaultIcon = L.icon({
@@ -125,6 +260,42 @@ function getFAIcon(tipo) {
           width:10px;
           height:10px;
           background:${color};
+          border-radius:50%;
+          box-shadow:0 1px 4px rgba(0,0,0,0.12);
+        "></div>
+      </div>
+    `,
+    iconSize: [38, 46],
+    iconAnchor: [19, 42],
+    popupAnchor: [0, -38]
+  });
+}
+
+function getUserIcon() {
+  return L.divIcon({
+    className: '',
+    html: `
+      <div style="
+        width:38px;
+        height:38px;
+        background:#bbf7d0;
+        border-radius:50% 50% 50% 50%/60% 60% 40% 40%;
+        box-shadow:0 2px 6px rgba(0,0,0,0.15);
+        display:flex;
+        align-items:center;
+        justify-content:center;
+        border:2px solid #059669;
+        position:relative;
+      ">
+        <i class="fa-solid fa-user-nurse" style="font-size:1.3rem;color:#059669;"></i>
+        <div style="
+          position:absolute;
+          left:50%;
+          bottom:-8px;
+          transform:translateX(-50%);
+          width:10px;
+          height:10px;
+          background:#059669;
           border-radius:50%;
           box-shadow:0 1px 4px rgba(0,0,0,0.12);
         "></div>
@@ -243,7 +414,35 @@ onMounted(() => {
 
   // Llama una vez al cargar
   emitVisibleCenters()
+
+  // Añade el control de geolocalización
+  const locateControl = L.Control.extend({
+    options: { position: 'topleft' },
+    onAdd: function () {
+      const container = L.DomUtil.create('div', 'leaflet-bar leaflet-control leaflet-control-custom');
+      container.style.backgroundColor = 'white'
+      container.style.width = '34px'
+      container.style.height = '34px'
+      container.style.display = 'flex'
+      container.style.alignItems = 'center'
+      container.style.justifyContent = 'center'
+      container.style.cursor = 'pointer'
+      container.title = 'Ir a mi ubicación'
+      container.innerHTML = `<i class="fa-solid fa-location-crosshairs" style="color:#2563eb;font-size:1.3rem;"></i>`
+
+      container.onclick = function (e) {
+        e.stopPropagation()
+        locateUser()
+      }
+      return container
+    }
+  })
+  map.addControl(new locateControl())
 })
+
+const userMarker = ref(null)
+let routeStartMarker = null
+let routeEndMarker = null
 
 function getCentersInBounds() {
   if (!map || !props.filteredData) return []
@@ -266,6 +465,13 @@ watch(
   { deep: true }
 )
 
+watch(
+  () => t.locale ? t.locale.value : undefined, // para vue-i18n v9+
+  () => updateMarkers(props.filteredData)
+)
+
+watch(locale, () => updateMarkers(props.filteredData))
+
 /* ─────────────── Update Markers Function ─────────────── */
 function updateMarkers(data) {
   if (!map || !clusterLayer) return
@@ -280,39 +486,69 @@ function updateMarkers(data) {
   data.forEach(feature => {
     const p = feature.properties
     const [lng, lat] = feature.geometry.coordinates
-    console.log(p);
 
-    const popupContent = `
-      <div style="min-width:260px">
-        <div class="font-bold text-base mb-1">${p.center_id ?p.center_id : ''} - ${p.centro ?? p.center_name ?? '—'}</div>
-      
-
-        <div class="flex flex-wrap gap-2 mb-2">
-          <span class="inline-block bg-blue-100 text-blue-800 text-xs rounded px-2 py-1">${p.tipo_centro ?? p.center_type ?? '—'}</span>
-          <span class="inline-block bg-green-100 text-green-800 text-xs rounded px-2 py-1">${p.area_salud ?? p.department_name ?? '—'}</span>
-        </div>
-        
-        <div class="mb-2 text-xs text-gray-700">
-          ${p.street_name ?? '—'}
-          ${p.street_number ? ', ' + p.street_number : ''}
-          ${p.postal_code ? ' · ' + p.postal_code : ''}
-          ${(p.municipio ?? p.municipality) ? ' · ' + (p.municipio ?? p.municipality) : ''}
-          ${p.province ? ' · ' + p.province : ''}
-        </div>
-        <div class="flex flex-wrap gap-2 mb-2">
-          <span class="inline-block bg-gray-100 text-gray-800 text-xs rounded px-2 py-1">Ofertadas: <b>${p.vacancies_offered ?? '—'}</b></span>
-          <span class="inline-block bg-gray-100 text-gray-800 text-xs rounded px-2 py-1">Asignadas: <b>${p.vacancies_assigned ?? '—'}</b></span>
-          <span class="inline-block bg-yellow-100 text-yellow-800 text-xs rounded px-2 py-1">Libres: <b>${p.vacancies_difference ?? '—'}</b></span>
-        </div>
-      </div>
-    `
-
-    // Usa un marcador con icono según tipo de centro
+    // Crea el marcador
     const marker = L.marker([lat, lng], {
-      icon: getFAIcon(p.tipo_centro ?? p.center_type)
+      icon: getFAIcon(p.tipo_centro ?? p.center_type),
+      markerId: p.center_id
     })
       .bindTooltip(p.centro ?? p.center_name ?? '—', { sticky: true })
-      .bindPopup(popupContent)
+
+    // Al abrir el popup, genera el contenido actualizado
+    marker.on('popupopen', () => {
+      let distanceHtml = ''
+      if (!userMarker.value) {
+        distanceHtml = `
+          <div class="mt-2 text-xs text-blue-900">
+            <a href="#" onclick="window.__calcDistanceTo__(${lat},${lng},'${p.center_id}')" style="color:#2563eb;text-decoration:underline;cursor:pointer;">
+              ${t('route.distancePrompt')}
+            </a>
+          </div>
+        `
+      } else {
+        const userLatLng = userMarker.value.getLatLng()
+        const centerLatLng = L.latLng(lat, lng)
+        const distance = userLatLng.distanceTo(centerLatLng)
+        let distanceText = distance >= 1000
+          ? `${(distance / 1000).toFixed(2)} km`
+          : `${Math.round(distance)} m`
+        const timeMinutes = Math.round((distance / 1000) / 50 * 60)
+        const timeText = timeMinutes > 0 ? `${timeMinutes} min` : '<1 min'
+        distanceHtml = `
+          <div class="mt-2 text-xs text-blue-900 flex flex-col gap-1">
+            <span><i class="fa-solid fa-location-arrow"></i> ${t('route.distanceFromYou')}: <b>${distanceText}</b></span>
+            <span><i class="fa-solid fa-clock"></i> ${t('route.timeFromYou')}: <b>${timeText}</b></span>
+          </div>
+        `
+      }
+
+      const popupContent = `
+        <div style="padding:16px 8px 8px 8px;max-width:320px;">
+          <div class="font-bold text-base mb-1">${p.center_id ? p.center_id : ''} - ${p.centro ?? p.center_name ?? '—'}</div>
+          <div class="flex flex-wrap gap-2 mb-2">
+            <span class="inline-block bg-blue-100 text-blue-800 text-xs rounded px-2 py-1">${p.tipo_centro ?? p.center_type ?? '—'}</span>
+            <span class="inline-block bg-green-100 text-green-800 text-xs rounded px-2 py-1">${p.area_salud ?? p.department_name ?? '—'}</span>
+          </div>
+          <div class="mb-2 text-xs text-gray-700">
+            ${p.street_name ?? '—'}
+            ${p.street_number ? ', ' + p.street_number : ''}
+            ${p.postal_code ? ' · ' + p.postal_code : ''}
+            ${(p.municipio ?? p.municipality) ? ' · ' + (p.municipio ?? p.municipality) : ''}
+            ${p.province ? ' · ' + p.province : ''}
+          </div>
+          ${distanceHtml}
+          <button onclick="window.__showRouteTo__([${lat},${lng}])"
+            style="margin:16px 0 0 0;padding:8px 16px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:10px;width:100%;font-size:1rem;">
+            <i class="fa-solid fa-car"></i>
+            ${t('route.routeToHere')}
+          </button>
+        </div>
+      `
+      marker.getPopup().setContent(popupContent)
+    })
+
+    // Inicializa el popup vacío (se rellenará al abrir)
+    marker.bindPopup('<div></div>')
 
     clusterLayer.addLayer(marker)
   })
@@ -321,7 +557,294 @@ function updateMarkers(data) {
     map.fitBounds(clusterLayer.getBounds(), { padding: [50, 50] })
   }
 }
-</script>
+
+function showRouteTo(lat, lng) {
+  if (!map) return
+
+  let start
+  if (userMarker.value) {
+    start = userMarker.value.getLatLng()
+    addRouting(start, [lat, lng])
+  } else {
+    pendingRoute.value = [lat, lng]
+    showSelectStartModal.value = true
+    // El resto se gestiona en el modal
+  }
+}
+
+function addRouting(start, end) {
+  // Elimina la ruta anterior si existe
+  if (routingControl) {
+    map.removeControl(routingControl)
+    routingControl = null
+    showRoutingPanel.value = false
+  }
+  showRoutingPanel.value = true // <-- Mueve esto antes de crear el control
+
+  // Espera un tick para asegurar que el panel está en el DOM
+  setTimeout(() => {
+    routingControl = L.Routing.control({
+      waypoints: [
+        L.latLng(start.lat, start.lng),
+        L.latLng(end[0], end[1])
+      ],
+      addWaypoints: false,
+      draggableWaypoints: false,
+      fitSelectedRoutes: true,
+      showAlternatives: false,
+      language: 'es',
+      lineOptions: {
+        styles: [
+          { color: '#2563eb', weight: 8, opacity: 0.85 }
+        ]
+      },
+      router: L.Routing.osrmv1({ language: 'es' }),
+      routeDragInterval: 100,
+      createMarker: () => null,
+      container: document.getElementById('routing-panel')
+    }).addTo(map)
+
+    // Escucha el evento de rutas encontradas
+    routingControl.on('routesfound', function(e) {
+      const routes = e.routes
+      if (routes && routes.length > 0) {
+        routeInstructions.value = routes[0].instructions || []
+        if (!routeInstructions.value.length && routes[0].segments) {
+          routeInstructions.value = routes[0].segments
+        }
+        routeSummary.value = routes[0].summary
+        lastRoute.value = routes[0]
+        // Guarda los nombres de los waypoints si existen
+        routeStartName.value = routes[0].waypoints?.[0]?.name || ''
+        routeEndName.value = routes[0].waypoints?.[1]?.name || ''
+      } else {
+        routeInstructions.value = []
+        routeSummary.value = null
+        lastRoute.value = null
+        routeStartName.value = ''
+        routeEndName.value = ''
+      }
+    })
+  }, 0)
+
+  // Elimina marcadores anteriores si existen
+  if (routeStartMarker) {
+    map.removeLayer(routeStartMarker)
+    routeStartMarker = null
+  }
+  if (routeEndMarker) {
+    map.removeLayer(routeEndMarker)
+    routeEndMarker = null
+  }
+
+  // Añade marcador de inicio
+  routeStartMarker = L.marker([start.lat, start.lng], {
+    icon: getUserIcon()
+  }).addTo(map).bindPopup(t('route.routeStart'))
+
+  // Añade marcador de fin
+  routeEndMarker = L.marker([end[0], end[1]], {
+    icon: L.icon({
+      iconUrl: 'https://cdn.jsdelivr.net/npm/@tabler/icons@2.47.0/icons/outline/map-pin.svg',
+      iconSize: [32, 32],
+      iconAnchor: [16, 32],
+      popupAnchor: [0, -32]
+    })
+  }).addTo(map).bindPopup(t('route.routeEnd'))
+
+  // Geocodifica el inicio
+  reverseGeocode(start.lat, start.lng).then(addr => {
+    routeStartAddress.value = addr
+  })
+  // Geocodifica el final
+  reverseGeocode(end[0], end[1]).then(addr => {
+    routeEndAddress.value = addr
+  })
+}
+
+window.__showRouteTo__ = (coords) => {
+  showRouteTo(coords[0], coords[1])
+}
+
+function useGeolocation() {
+  showSelectStartModal.value = false
+  selectingOnMap.value = false
+  locateUser(() => {
+    // Cuando se obtenga la ubicación, traza la ruta
+    if (userMarker.value && pendingRoute.value) {
+      addRouting(userMarker.value.getLatLng(), pendingRoute.value)
+      pendingRoute.value = null
+    }
+  })
+}
+
+function startSelectingOnMap() {
+  showGeoDialog.value = false // Cierra el diálogo
+  selectingOnMap.value = true // Activa el modo de selección
+
+  // Escucha el clic en el mapa
+  map.once('click', (e) => {
+    const { lat, lng } = e.latlng
+    if (userMarker.value) { 
+      userMarker.value.setLatLng([lat, lng])
+      userMarker.value.setIcon(getUserIcon()) // Usa el mismo icono que en la geolocalización
+    } else {
+      userMarker.value = L.marker([lat, lng], { icon: getUserIcon(), draggable: true }).addTo(map)
+    }
+    selectingOnMap.value = false // Desactiva el modo de selección
+
+    // Recalcula la distancia para el último marcador abierto
+    if (window.__lastMarkerId) {
+      const marker = clusterLayer.getLayers().find(m => m.options.markerId === window.__lastMarkerId)
+      if (marker) marker.openPopup()
+      window.__lastMarkerId = null
+    }
+  })
+}
+
+function cancelRoute() { 
+  showSelectStartModal.value = false
+  selectingOnMap.value = false
+  pendingRoute.value = null
+}
+
+function cancelSelectingOnMap() {
+  selectingOnMap.value = false
+  showSelectStartModal.value = false
+  pendingRoute.value = null
+}
+
+watch(selectingOnMap, (active) => {
+  if (active) {
+    map.getContainer().style.cursor = 'crosshair'
+    map.on('click', onMapClickForRoute)
+  } else {
+    map.getContainer().style.cursor = ''
+    map.off('click', onMapClickForRoute)
+  }
+})
+
+function onMapClickForRoute(e) {
+  if (!pendingRoute.value) return
+  showSelectStartModal.value = false
+  selectingOnMap.value = false
+  map.getContainer().style.cursor = ''
+  addRouting(e.latlng, pendingRoute.value)
+  pendingRoute.value = null
+}
+
+// Modifica locateUser para aceptar un callback opcional
+function locateUser(cb) {
+  if (!map) return
+  if (!navigator.geolocation) {
+    alert('La geolocalización no está soportada en este navegador.')
+    return
+  }
+  navigator.geolocation.getCurrentPosition(
+    pos => {
+      const { latitude, longitude } = pos.coords
+      if (userMarker.value) {
+        userMarker.value.setLatLng([latitude, longitude])
+        userMarker.value.setIcon(getUserIcon()) 
+      } else {
+        userMarker.value = L.marker([latitude, longitude], {
+          icon: getUserIcon()
+        })
+          .addTo(map)
+          .bindPopup(t('route.here'))
+      }
+      map.setView([latitude, longitude], 14)
+      userMarker.value.openPopup()
+      if (cb) cb()
+    },
+    err => {
+      alert('No se pudo obtener tu ubicación.')
+    }
+  )
+}
+
+function clearRoute() {
+  if (routingControl) {
+    map.removeControl(routingControl)
+    routingControl = null
+  }
+  showRoutingPanel.value = false 
+  // No limpies el innerHTML aquí
+}
+
+function formatDuration(seconds) {
+  const h = Math.floor(seconds / 3600)
+  const m = Math.floor((seconds % 3600) / 60)
+  if (h > 0) return `${h} h ${m} min`
+  return `${m} min`
+}
+ 
+function goToStep(i) {
+  if (!lastRoute.value) return
+
+  const step = routeInstructions.value[i]
+  let coordIdx = null
+
+  if (step && step.interval && Array.isArray(step.interval)) {
+    coordIdx = step.interval[0]
+  } else if (step && typeof step.index === 'number') {
+    coordIdx = step.index
+  }
+
+  if (coordIdx !== null && lastRoute.value.coordinates && lastRoute.value.coordinates[coordIdx]) {
+    const coord = lastRoute.value.coordinates[coordIdx]
+    // Calcula el desplazamiento horizontal (en píxeles) para el panel lateral
+    const offsetX = window.innerWidth > 768 ? 170 : window.innerWidth / 2
+    const point = map.latLngToContainerPoint([coord.lat, coord.lng])
+    const newPoint = L.point(point.x - offsetX, point.y)
+    const newLatLng = map.containerPointToLatLng(newPoint)
+    map.setView(newLatLng, 17, { animate: true })
+
+    // Marcador temporal
+    L.circleMarker([coord.lat, coord.lng], {
+      radius: 10,
+      color: '#2563eb',
+      fillColor: '#2563eb',
+      fillOpacity: 0.4
+    }).addTo(map).bringToFront().bindPopup(t('route.routeStep')).openPopup()
+  }
+}
+
+async function reverseGeocode(lat, lng) {
+  try {
+    const url = `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
+    const res = await fetch(url, {
+      headers: { 'Accept-Language': 'es' }
+    })
+    const data = await res.json()
+    return data.display_name || ''
+  } catch (e) {
+    return ''
+  } 
+}
+
+window.__calcDistanceTo__ = (lat, lng, markerId) => {
+  if (!userMarker.value) {
+    showGeoDialog.value = true
+    window.__lastMarkerId = markerId // Guarda el marcador para actualizarlo después
+  } else {
+    const marker = clusterLayer.getLayers().find(m => m.options.markerId === markerId)
+    if (marker) marker.openPopup()
+  }
+}
+
+function requestGeolocation() {
+  locateUser(() => {
+    showGeoDialog.value = false
+    // Reabrir el popup del centro tras geolocalizar
+    if (window.__lastMarkerId) {
+      const marker = clusterLayer.getLayers().find(m => m.options.markerId === window.__lastMarkerId)
+      if (marker) marker.openPopup()
+      window.__lastMarkerId = null
+    }
+  })
+}
+</script> 
 
 <style scoped>
 /* ensure the map canvas fills its parent flex/grid cell */

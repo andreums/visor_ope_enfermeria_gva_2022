@@ -5,6 +5,7 @@ import i18nConfig from './i18n'
 import './styles.css'
 import PrimeVue from 'primevue/config'
 import Lara from '@primeuix/themes/lara';
+import './registerServiceWorker'
 
 const i18n = createI18n(i18nConfig)
 
