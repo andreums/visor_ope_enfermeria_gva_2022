@@ -30,6 +30,8 @@ const visibleCenters = ref([])
 const showStatsPanel = ref(false)
 const showRawData = ref(false)
 const showHelp = ref(false)
+const showInstallModal = ref(false)
+let deferredPrompt = null
 
 const checkScreenSize = () => { isMobile.value = window.innerWidth < 768 }
 const setLanguage = () => {
@@ -42,6 +44,12 @@ onMounted(() => {
   checkScreenSize()
   setLanguage()
   window.addEventListener('resize', checkScreenSize)
+  window.addEventListener('beforeinstallprompt', (e) => {
+    // Previene que el navegador muestre el banner de instalación por defecto
+    e.preventDefault()
+    deferredPrompt = e
+    showInstallModal.value = true // Muestra el modal
+  })
 })
 
 // Filter functions
@@ -89,6 +97,20 @@ watch([selectedAreas, selectedTipos, selectedMunicipios], (newValues) => {
     municipios: newValues[2]
   })
 }, { deep: true })
+
+const installPWA = async () => {
+  if (deferredPrompt) {
+    deferredPrompt.prompt() // Muestra el prompt de instalación
+    const { outcome } = await deferredPrompt.userChoice
+    if (outcome === 'accepted') {
+      console.log('El usuario aceptó instalar la PWA.')
+    } else {
+      console.log('El usuario rechazó instalar la PWA.')
+    }
+    deferredPrompt = null // Limpia el evento
+    showInstallModal.value = false // Cierra el modal
+  }
+}
 </script>
 
 <template>
@@ -242,6 +264,34 @@ watch([selectedAreas, selectedTipos, selectedMunicipios], (newValues) => {
             >
               {{ t('about.close') }}
             </button>
+          </div>
+        </transition>
+
+        <!-- Install Modal -->
+        <transition name="fade">
+          <div
+            v-if="showInstallModal"
+            class="fixed top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 z-50 bg-white shadow-lg rounded-lg p-6"
+            style="width: 90vw; max-width: 400px;"
+          >
+            <h2 class="text-lg font-semibold mb-4">Instalar aplicación</h2>
+            <p class="text-sm text-gray-700 mb-4">
+              Instala esta aplicación en tu dispositivo para acceder más rápido y disfrutar de una experiencia completa.
+            </p>
+            <div class="flex gap-4">
+              <button
+                @click="installPWA"
+                class="flex-1 bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
+              >
+                Instalar
+              </button>
+              <button
+                @click="showInstallModal = false"
+                class="flex-1 bg-gray-300 text-gray-700 py-2 rounded-md hover:bg-gray-400 transition"
+              >
+                Cancelar
+              </button>
+            </div>
           </div>
         </transition>
       </div>
