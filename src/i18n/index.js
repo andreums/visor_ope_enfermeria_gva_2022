@@ -78,7 +78,8 @@ export default {
         distancePrompt: 'Calcula la distancia a este centro sanitario',
         distanceNeedGeo: 'Debes geolocalizar tu posición para calcular la distancia',
         distanceFromYou: 'Distancia desde tu ubicación',
-        timeFromYou: 'Tiempo estimado desde tu ubicación'
+        timeFromYou: 'Tiempo estimado desde tu ubicación',
+        clearRoute: 'Eliminar ruta'
       },
       about: {
         title: 'Acerca de',
@@ -169,7 +170,8 @@ export default {
         distancePrompt: 'Calcula la distància a aquest centre sanitari',
         distanceNeedGeo: 'Has de geolocalitzar la teua posició per calcular la distància',
         distanceFromYou: 'Distància des de la teua ubicació',
-        timeFromYou: 'Temps estimat des de la teua ubicació'
+        timeFromYou: 'Temps estimat des de la teua ubicació',
+        clearRoute: 'Eliminar ruta'
       }, 
       about: {
         title: 'Sobre nosaltres',

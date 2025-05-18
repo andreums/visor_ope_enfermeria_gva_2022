@@ -2,56 +2,6 @@
   <div class="flex h-full w-full">
     <!-- the parent (App.vue) gives full height & width -->
     <div id="map" class="flex-1 h-full rounded-lg shadow-md"></div>
-    <div
-      id="routing-panel"
-      v-show="showRoutingPanel"
-      class="fixed right-0 top-0 z-[2001] w-full md:w-[340px] max-w-full h-full bg-white border-l border-gray-200 shadow-lg overflow-y-auto p-4"
-      style="min-width:240px;"
-    >
-      <!-- Botón para cerrar indicaciones -->
-      <button
-        class="absolute top-2 right-2 text-gray-500 hover:text-gray-900"
-        @click="clearRoute"
-        :aria-label="t('route.closeDirections')"
-      >
-        <i class="fa-solid fa-xmark text-2xl"></i>
-      </button>
-
-      <!-- Nueva sección para mostrar instrucciones de la ruta -->
-      <div v-if="routeSummary" class="mb-4 space-y-2">
-        <div class="flex items-center gap-2">
-          <i class="fa-solid fa-location-dot text-green-600"></i>
-          <span class="font-semibold">{{ t('route.start') }}:</span>
-          <span class="text-gray-700">{{ routeStartAddress || routeStartName || '—' }}</span>
-        </div>
-        <div class="flex items-center gap-2">
-          <i class="fa-solid fa-location-dot text-red-600"></i>
-          <span class="font-semibold">{{ t('route.end') }}:</span>
-          <span class="text-gray-700">{{ routeEndAddress || routeEndName || '—' }}</span>
-        </div> 
-        <div class="font-semibold text-base">
-          {{ t('route.totalDistance') }}: <span class="text-blue-700">{{ (routeSummary.totalDistance / 1000).toFixed(2) }} km</span>
-        </div>
-        <div class="font-semibold text-base">
-          {{ t('route.estimatedDuration') }}: <span class="text-blue-700">{{ formatDuration(routeSummary.totalTime) }}</span>
-        </div>
-      </div>
-      <div v-if="routeInstructions.length">
-        <h3 class="font-bold mb-2 text-lg">{{ t('route.instructions') }}</h3>
-        <ol class="list-decimal pl-5 space-y-2">
-          <li
-            v-for="(step, i) in routeInstructions"
-            :key="i"
-            class="cursor-pointer hover:bg-blue-50 rounded px-1 transition"
-            @click="goToStep(i)"
-          >
-            {{ step.text || step.instruction || step.streetName || step.name }}
-            <span v-if="step.distance"> ({{ (step.distance/1000).toFixed(2) }} km)</span>
-          </li>
-        </ol>
-      </div>
-      <div v-else class="text-gray-500">{{ t('route.noInstructions') }}</div>
-    </div>
 
     <!-- Diálogo: solo muestra opciones, NO bloquea el mapa al seleccionar en el mapa -->
     <Dialog
@@ -115,7 +65,7 @@
       {{ t('route.clickOnMap') }}
     </div>
   </div>
-</template>
+</template> 
 
 <script setup>
 import { onMounted, watch, ref } from 'vue'
@@ -600,25 +550,16 @@ function addRouting(start, end) {
       container: document.getElementById('routing-panel')
     }).addTo(map)
 
-    // Escucha el evento de rutas encontradas
-    routingControl.on('routesfound', function(e) {
-      const routes = e.routes
-      if (routes && routes.length > 0) {
-        routeInstructions.value = routes[0].instructions || []
-        if (!routeInstructions.value.length && routes[0].segments) {
-          routeInstructions.value = routes[0].segments
-        }
-        routeSummary.value = routes[0].summary
-        lastRoute.value = routes[0]
-        // Guarda los nombres de los waypoints si existen
-        routeStartName.value = routes[0].waypoints?.[0]?.name || ''
-        routeEndName.value = routes[0].waypoints?.[1]?.name || ''
-      } else {
-        routeInstructions.value = []
-        routeSummary.value = null
-        lastRoute.value = null
-        routeStartName.value = ''
-        routeEndName.value = ''
+    // Añade el botón "Limpiar ruta" al panel de Leaflet Routing Machine
+    routingControl.on('routeselected', () => {
+      const container = document.querySelector('.leaflet-routing-container')
+      if (container && !container.querySelector('.btn-clear-route')) {
+        const btn = document.createElement('button')
+        btn.textContent = t('route.clearRoute') || 'Borrar ruta'
+        btn.className = 'btn-clear-route leaflet-bar bg-red-100 text-red-700 py-2 px-3 rounded hover:bg-red-200'
+        btn.style.margin = '12px 0 0 0'
+        btn.onclick = clearRoute
+        container.appendChild(btn)
       }
     })
   }, 0)
@@ -765,7 +706,6 @@ function clearRoute() {
     routingControl = null
   }
   showRoutingPanel.value = false 
-  // No limpies el innerHTML aquí
 }
 
 function formatDuration(seconds) {
@@ -839,6 +779,24 @@ function requestGeolocation() {
       window.__lastMarkerId = null
     }
   })
+}
+
+function getInstructionIcon(type) {
+  // Puedes personalizar los iconos según el tipo
+  switch (type) {
+    case 'Straight': return 'fa-arrow-up';
+    case 'SlightRight': return 'fa-arrow-up-right';
+    case 'Right': return 'fa-arrow-right';
+    case 'SharpRight': return 'fa-arrow-turn-down';
+    case 'TurnAround': return 'fa-rotate-left';
+    case 'SharpLeft': return 'fa-arrow-turn-up';
+    case 'Left': return 'fa-arrow-left';
+    case 'SlightLeft': return 'fa-arrow-up-left';
+    case 'StartAt': return 'fa-play';
+    case 'DestinationReached': return 'fa-flag-checkered';
+    case 'EnterRoundabout': return 'fa-circle-notch';
+    default: return 'fa-location-arrow';
+  }
 }
 </script> 
 

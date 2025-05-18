@@ -200,10 +200,10 @@ const installPWA = async () => {
           <button
             @click="showHelp = true"
             class="flex items-center gap-2 bg-gray-600 text-white px-5 py-2 rounded-full shadow-lg hover:bg-gray-700 transition"
-            style="min-width: 110px;"
+            style="min-width: 48px;"
           >
             <i class="fa-solid fa-circle-info"></i>
-            {{ t('buttons.acercaDe') }}
+            <span v-if="!isMobile">{{ t('buttons.acercaDe') }}</span>
           </button>
           <button
             v-if="deferredPrompt"
