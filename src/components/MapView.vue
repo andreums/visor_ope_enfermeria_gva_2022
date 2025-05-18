@@ -482,12 +482,44 @@ function updateMarkers(data) {
             ${(p.municipio ?? p.municipality) ? ' · ' + (p.municipio ?? p.municipality) : ''}
             ${p.province ? ' · ' + p.province : ''}
           </div>
+          <div class="mb-2 text-xs">
+            <div class="font-semibold mb-1" style="color:#2563eb;">${t('route.plazas') || 'Plazas'}</div>
+            <div class="flex flex-col gap-1">
+              <span class="inline-block bg-blue-50 text-blue-900 rounded px-2 py-1">
+                <b>${t('route.offered') || 'Ofertadas'}:</b> ${p.vacancies_offered ?? '—'}
+              </span>
+              <span class="inline-block bg-green-50 text-green-900 rounded px-2 py-1">
+                <b>${t('route.assigned') || 'Asignadas'}:</b> ${p.vacancies_assigned ?? '—'}
+              </span>
+              <span class="inline-block bg-gray-100 text-gray-900 rounded px-2 py-1">
+                <b>${t('route.free') || 'Libres'}:</b> ${
+                  typeof p.vacancies_offered === 'number' && typeof p.vacancies_assigned === 'number'
+                    ? p.vacancies_offered - p.vacancies_assigned
+                    : '—'
+                }
+              </span>
+            </div>
+          </div>
           ${distanceHtml}
-          <button onclick="window.__showRouteTo__([${lat},${lng}])"
-            style="margin:16px 0 0 0;padding:8px 16px;background:#2563eb;color:#fff;border:none;border-radius:6px;cursor:pointer;display:flex;align-items:center;gap:10px;width:100%;font-size:1rem;">
-            <i class="fa-solid fa-car"></i>
-            ${t('route.routeToHere')}
-          </button>
+          <div class="flex gap-2 mt-4">
+            <button
+              onclick="window.__showRouteTo__([${lat},${lng}])"
+              class="flex-1 flex items-center justify-center gap-2 bg-blue-600 text-white text-xs font-medium py-2 rounded-md hover:bg-blue-700 transition"
+              style="border:none; cursor:pointer;"
+            >
+              <i class="fa-solid fa-car"></i>
+              <span>${t('route.routeToHere')}</span>
+            </button>
+            <a
+              href="https://www.google.com/maps/search/?api=1&query=${lat},${lng}"
+              target="_blank"
+              class="flex-1 flex items-center justify-center gap-2 bg-green-500 text-white text-xs font-medium py-2 rounded-md hover:bg-green-600 transition"
+              style="border:none; cursor:pointer; text-decoration:none;"
+            >
+              <i class="fa-brands fa-google"></i>
+              <span>Google Maps</span>
+            </a>
+          </div>
         </div>
       `
       marker.getPopup().setContent(popupContent)
